@@ -5,6 +5,7 @@ Created on Tue Nov 14 11:08:40 2023
 @author: Jérôme
 """
 
+import random
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.transpiler import Layout
@@ -89,31 +90,24 @@ m=backend.num_qubits
 ##     A vous de jouer !  
 ##-------------------------------------------------------
 
-###### Votre code ici
+instance_num=1
 
-###### A faire : un algo d'optimisation qui minimise la fonction fitness,
-###### fonction qui accepte en entrée :
-###### une liste de n parmi m (n<=m) entiers deux à deux distincts
-###### N'oubliez pas d'écrire la solution dans [GROUPE]_instance_[instance_num].txt
+backend_name,circuit_type,num_qubit=instance_selection(instance_num)
+backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
 
-###### /!\ Attention /!\
-###### Il est possible que la ligne 40 : qasmfile=f".\Instances\{l.rstrip()}.qasm"
-###### crée un problème à l'execution si le chemin n'est pas le bon,
-###### en particulier sous Linux. Essayer de la remplacer par
-###### qasmfile=f"./Instances/{l.rstrip()}.qasm". Cela devrait résoudre le problème.
+n=num_qubit
+m=backend.num_qubits
 
-###### Voici un test (à supprimer !) pour s'assurer que tout va bien
-for i in range(1,10):
-    instance_num=i     #### Entre 1 et 9 inclue
-
-    backend_name,circuit_type,num_qubit=instance_selection(instance_num)
-    backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
-
-    n=num_qubit
-    m=backend.num_qubits
-    r=fitness(list(range(n)))
-    print(f"n={n}, m={m} et fitness_test={r}. Instance {instance_num} ok !")
-
-
-
-
+def InitializePopulation(size):
+    
+    pop = list()
+    for i in range(size):
+        pop.append(random.sample(list(range(m-1)),n))
+    return pop
+    
+population = InitializePopulation(10)
+for i in range(len(population)-1):
+    r=fitness(population[i])
+    
+    print(population[i])
+    print(f"n={n}, m={m} et fitness_test={r}.")
