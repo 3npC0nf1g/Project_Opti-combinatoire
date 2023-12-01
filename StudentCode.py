@@ -37,7 +37,7 @@ def instance_characteristic(backend_name,circuit_type,num_qubit):
         backend = FakeWashingtonV2()
         
     l=f"{circuit_type}_indep_qiskit_{num_qubit}"
-    qasmfile=f".\Instances\{l.rstrip()}.qasm"  ###### Il est possible de cette ligne soit problèmatique.
+    qasmfile=f"./Instances/{l.rstrip()}.qasm"  ###### Il est possible de cette ligne soit problèmatique.
     qc=QuantumCircuit().from_qasm_file(qasmfile)
     qr=qc.qregs[0]
     
