@@ -106,8 +106,17 @@ def InitializePopulation(size):
     return pop
     
 population = InitializePopulation(10)
-for i in range(len(population)-1):
-    r=fitness(population[i])
-    
+listcost = list()
+
+for i in range(len(population)):
+    r = fitness(population[i])
+    listcost.append(1/r)
+
     print(population[i])
     print(f"n={n}, m={m} et fitness_test={r}.")
+
+for j in range(int((len(population))/2)):
+    couple = random.choices(population=population,weights=tuple(listcost),k=2)
+    print(couple)
+
+    
