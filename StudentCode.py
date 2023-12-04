@@ -98,16 +98,30 @@ backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
 n=num_qubit
 m=backend.num_qubits
 
-def InitializePopulation(size):
+size_population=10
+half_size_population=size_population//2
+
+def initialize_population(size):
     
     pop = list()
     for i in range(size):
-        pop.append(random.sample(list(range(m-1)),n))
+        pop.append(random.sample(range(m-1),n))
     return pop
     
-population = InitializePopulation(10)
-for i in range(len(population)-1):
-    r=fitness(population[i])
-    
+population = initialize_population(size_population)
+list_cost = list()
+
+for i in range(size_population):
+    r = fitness(population[i])
+    list_cost.append(r)
+
     print(population[i])
     print(f"n={n}, m={m} et fitness_test={r}.")
+
+total_cost = sum(list_cost)
+probability_cost = [cost / total_cost for cost in list_cost]
+
+for j in range(half_size_population):
+    indices = np.random.choice(range(size_population),2,False,probability_cost)
+    couple = [population[i] for i in indices]
+    print(couple)
