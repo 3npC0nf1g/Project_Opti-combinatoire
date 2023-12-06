@@ -124,6 +124,11 @@ class ChildSolution(Solution):
         second_part = list_tmp_second[0 : n - len(first_part) - len(third_part)]
 
         return (first_part + second_part + third_part)
+    
+    def mutation(self):
+        list_possibilities = [x for x in range(m-1) if x not in self.solution]
+        mutation_value = list_possibilities[random.randint(0,len(list_possibilities))]
+        self.solution[random.randint(0,len(self.solution)-1)] = mutation_value
 
 class Population:
     best_solution = None
@@ -167,6 +172,12 @@ class Population:
             couple = self.choose_solutions(2)
 
             child = ChildSolution(couple[0],couple[1])
+
+            if(random.randint(0,99) < mutation_probability):
+                child.mutation()
+
+            child = best_local_children(child)
+
             childs.append(child)
 
         for c in childs:
@@ -174,15 +185,61 @@ class Population:
 
         self.pop = self.choose_solutions(size_population)
 
+def best_permutation_neighbor(solution):
+    best = solution
+    for i in range(n-1):
+        for j in range(n-1):
+            neighbor_sol = best.solution
+            
+            neighbor_sol[i],neighbor_sol[j] = neighbor_sol[j],neighbor_sol[i]
+            neighbor = Solution(solution = neighbor_sol)
+    
+            if(neighbor.cost < best.cost):
+                best = neighbor    
+    return best
 
-size_population = 10
+def best_insertion_neighbor(solution):
+    best = solution
+    for i in range(n-2):
+        neighbor_sol = solution.solution
+
+        tmp = neighbor_sol.pop(i)
+        neighbor_sol.insert(i+1,tmp)
+        neighbor = Solution(solution = neighbor_sol)
+
+        if(neighbor.cost < best.cost):
+            best = neighbor 
+    return best
+
+def best_local_children(child):
+    best_local = child
+    current = child
+        
+    while(True):
+        print("Insertion")
+        best = best_insertion_neighbor(best_local)
+        if(best.cost < best_local.cost):
+            best_local = best
+            
+        if(best_local.cost == current.cost):
+            print(f"local best : {best_local.solution} cost : {best_local.cost}")
+            break
+        else :
+            print(f"local best : {best_local.solution} cost : {best_local.cost}")
+            current = best_local
+    return best_local
+
+
+size_population = 50
 half_size_population=size_population//2
-number_of_reproduction_per_population = 5
+number_of_reproduction_per_population = 15
+mutation_probability = 10
 
 number_of_population_generate = 0
+
 while True: 
     population = Population(size_population)
-    number_of_population_generate = number_of_population_generate + 1
+    number_of_population_generate +=1
     print(f"Population pool {number_of_population_generate}\n")
     population.show_actual_population()
     population.show_best_solution()
@@ -191,7 +248,7 @@ while True:
         print(f"{i+1}e reproducing... \n")
         population.reproduce(half_size_population)
         population.show_best_solution()
-    
+
     print("---------------------------------\n")
     print(f"Actual best solution is {population.best_solution.solution} with a cost {population.best_solution.cost}\n")
     print("---------------------------------\n")
