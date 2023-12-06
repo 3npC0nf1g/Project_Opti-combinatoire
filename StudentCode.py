@@ -90,38 +90,108 @@ m=backend.num_qubits
 ##     A vous de jouer !  
 ##-------------------------------------------------------
 
-instance_num=1
+class Solution:
+    solution = None
+    cost = None
 
-backend_name,circuit_type,num_qubit=instance_selection(instance_num)
-backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
+    def __init__(self,solution=None):
+        if(solution == None):
+            self.solution = random.sample(range(m-1),n)
+        else:
+            self.solution = solution
+        self.cost = fitness(self.solution)
 
-n=num_qubit
-m=backend.num_qubits
+class ChildSolution(Solution):
+    father_solution = None
+    mother_solution = None
 
-size_population=10
-half_size_population=size_population//2
+    def __init__(self,father_solution,mother_solution):
+        self.father_solution = father_solution
+        self.mother_solution = mother_solution
 
-def initialize_population(size):
-    
+        super().__init__(solution=self.cross_two_points())
+
+    def cross_two_points(self):
+        first_point = random.randint(0,n-1)
+        second_point = random.randint(first_point,n-1)
+
+        first_part = (self.father_solution.solution)[0:first_point]
+        third_part = (self.father_solution.solution)[second_point:n]
+
+        list_tmp_first = [x for x in self.mother_solution.solution if x not in first_part]
+        list_tmp_second = [x for x in list_tmp_first if x not in third_part]
+
+        second_part = list_tmp_second[0 : n - len(first_part) - len(third_part)]
+
+        return (first_part + second_part + third_part)
+
+class Population:
+    best_solution = None
     pop = list()
-    for i in range(size):
-        pop.append(random.sample(range(m-1),n))
-    return pop
+
+    def __init__(self,size):
+        self.pop.clear()
+        self.initialize_solutions(size)
+
+    def show_best_solution(self):
+        print("Best Solution : \n")
+        print(f"Solution : {self.best_solution.solution} with cost : {self.best_solution.cost} \n")
+
+    def show_actual_population(self):
+        for sol in self.pop:
+            print(f"Solution : {sol.solution} with cost : {sol.cost} \n")
+
+    def is_best_solution(self,new_solution):
+        if(self.best_solution == None or new_solution.cost < self.best_solution.cost):
+            self.best_solution = new_solution
+            return True
+        return False
+
+    def initialize_solutions(self,size):
+        for i in range(size):
+            self.add_solution(Solution())
+
+    def add_solution(self,new_solution):
+        self.pop.append(new_solution)
+        self.is_best_solution(new_solution)
+
+    def choose_solutions(self,size):
+        total_cost = sum([s.cost for s in self.pop])
+        probability_cost = [s.cost / total_cost for s in self.pop]
+        return list(np.random.choice(self.pop,size,False,probability_cost))
     
-population = initialize_population(size_population)
-list_cost = list()
+    def reproduce(self,number_of_childs):
+        childs = list()
 
-for i in range(size_population):
-    r = fitness(population[i])
-    list_cost.append(r)
+        for i in range(number_of_childs):
+            couple = self.choose_solutions(2)
 
-    print(population[i])
-    print(f"n={n}, m={m} et fitness_test={r}.")
+            child = ChildSolution(couple[0],couple[1])
+            childs.append(child)
 
-total_cost = sum(list_cost)
-probability_cost = [cost / total_cost for cost in list_cost]
+        for c in childs:
+            self.add_solution(c)
 
-for j in range(half_size_population):
-    indices = np.random.choice(range(size_population),2,False,probability_cost)
-    couple = [population[i] for i in indices]
-    print(couple)
+        self.pop = self.choose_solutions(size_population)
+
+
+size_population = 10
+half_size_population=size_population//2
+number_of_reproduction_per_population = 5
+
+number_of_population_generate = 0
+while True: 
+    population = Population(size_population)
+    number_of_population_generate = number_of_population_generate + 1
+    print(f"Population pool {number_of_population_generate}\n")
+    population.show_actual_population()
+    population.show_best_solution()
+
+    for i in range(number_of_reproduction_per_population):
+        print(f"{i+1}e reproducing... \n")
+        population.reproduce(half_size_population)
+        population.show_best_solution()
+    
+    print("---------------------------------\n")
+    print(f"Actual best solution is {population.best_solution.solution} with a cost {population.best_solution.cost}\n")
+    print("---------------------------------\n")
