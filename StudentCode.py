@@ -102,18 +102,28 @@ class Solution:
         self.cost = fitness(self.solution)
 
 class ChildSolution(Solution):
+    father_solution = None
+    mother_solution = None
+
     def __init__(self,father_solution,mother_solution):
+        self.father_solution = father_solution
+        self.mother_solution = mother_solution
+
+        super().__init__(solution=self.cross_two_points())
+
+    def cross_two_points(self):
         first_point = random.randint(0,n-1)
         second_point = random.randint(first_point,n-1)
 
-        first_part = (father_solution.solution)[0:first_point]
-        third_part = (father_solution.solution)[second_point:n]
+        first_part = (self.father_solution.solution)[0:first_point]
+        third_part = (self.father_solution.solution)[second_point:n]
 
-        list_temp = [x for x in mother_solution.solution if (x not in first_part) and (x not in third_part)]
+        list_tmp_first = [x for x in self.mother_solution.solution if x not in first_part]
+        list_tmp_second = [x for x in list_tmp_first if x not in third_part]
 
-        second_part = list_temp[0 : n - len(first_part) - len(third_part)]
+        second_part = list_tmp_second[0 : n - len(first_part) - len(third_part)]
 
-        super().__init__(solution=first_part + second_part + third_part)
+        return (first_part + second_part + third_part)
 
 class Population:
     best_solution = None
@@ -164,15 +174,16 @@ class Population:
 
         self.pop = self.choose_solutions(size_population)
 
-size_population=10
+
+size_population = 10
 half_size_population=size_population//2
 number_of_reproduction_per_population = 5
-number_of_population_generate = 1
 
+number_of_population_generate = 0
 while True: 
     population = Population(size_population)
-    print(f"Population pool {number_of_population_generate}\n")
     number_of_population_generate = number_of_population_generate + 1
+    print(f"Population pool {number_of_population_generate}\n")
     population.show_actual_population()
     population.show_best_solution()
 
