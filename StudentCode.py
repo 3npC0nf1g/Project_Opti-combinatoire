@@ -78,7 +78,7 @@ def instance_selection(instance_num):
 ##     Pour choisir une instance: 
 ##     Modifier instance_num ET RIEN D'AUTRE    
 ##-------------------------------------------------------
-instance_num=1     #### Entre 1 et 9 inclue
+instance_num=1    #### Entre 1 et 9 inclue
 
 backend_name,circuit_type,num_qubit=instance_selection(instance_num)
 backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
@@ -101,6 +101,18 @@ class Solution:
             self.solution = solution
         self.cost = fitness(self.solution)
 
+    # ajout d'une mutation pour améliorer l'algorithme
+    def mutate(self):
+        mutation_point1 = random.randint(0, n - 1)
+        mutation_point2 = random.randint(0, n - 1)
+
+        self.solution[mutation_point1], self.solution[mutation_point2] = (
+            self.solution[mutation_point2],
+            self.solution[mutation_point1],
+        )
+
+        self.cost = fitness(self.solution)
+
 class ChildSolution(Solution):
     father_solution = None
     mother_solution = None
@@ -110,6 +122,11 @@ class ChildSolution(Solution):
         self.mother_solution = mother_solution
 
         super().__init__(solution=self.cross_two_points())
+
+        # ajout d'une proba de mutation
+        mutation_probability = 0.1
+        if random.random() < mutation_probability:
+            self.mutate()
 
     def cross_two_points(self):
         first_point = random.randint(0,n-1)
@@ -128,6 +145,13 @@ class ChildSolution(Solution):
 class Population:
     best_solution = None
     pop = list()
+
+    def mutation_population(self, mutation_percentage):
+        mutation_count = int(mutation_percentage * len(self.pop))
+
+        for i in range(mutation_count):
+            random_solution = random.choice(self.pop)
+            random_solution.mutate()
 
     def __init__(self,size):
         self.pop.clear()
@@ -190,6 +214,7 @@ while True:
     for i in range(number_of_reproduction_per_population):
         print(f"{i+1}e reproducing... \n")
         population.reproduce(half_size_population)
+        population.mutation_population(mutation_percentage=0.05) # pour 10% de mutation
         population.show_best_solution()
     
     print("---------------------------------\n")
