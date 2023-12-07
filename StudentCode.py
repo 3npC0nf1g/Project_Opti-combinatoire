@@ -90,6 +90,10 @@ m=backend.num_qubits
 ##     A vous de jouer !  
 ##-------------------------------------------------------
 
+# The line below just for me (steve) to off all the warning i have when i run the code
+np.seterr(all='ignore')
+
+
 class Solution:
     solution = None
     cost = None
@@ -214,7 +218,7 @@ while True:
     for i in range(number_of_reproduction_per_population):
         print(f"{i+1}e reproducing... \n")
         population.reproduce(half_size_population)
-        population.mutation_population(mutation_percentage=0.05) # pour 10% de mutation
+        population.mutation_population(mutation_percentage=0.3) # pour 10% de mutation
         population.show_best_solution()
     
     print("---------------------------------\n")
