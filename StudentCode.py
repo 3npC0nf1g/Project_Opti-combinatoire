@@ -217,22 +217,22 @@ def best_inversion_neighbor(current):
     return best
 
 def best_local_children(child):
-    best_local = child.clone()
+    best = child.clone()
     current = child.clone()
         
     while(True):
-        print("Inversion")
-        best = best_inversion_neighbor(best_local)
-        if(best.cost < best_local.cost):
-            best_local = best.clone()
-            
-        if(best_local.cost == current.cost):
-            print(f"local best : {best_local.solution} cost : {best_local.cost}")
+        best_neighbor = best_inversion_neighbor(current)
+
+        if(best.cost > best_neighbor.cost):
+            best = best_neighbor
+     
+        if(current.cost == best.cost):
+            print(f"local best : {best.solution} cost : {best.cost}")
             break
         else :
-            print(f"local best : {best_local.solution} cost : {best_local.cost}")
-            current = best_local.clone()
-    return best_local
+            current = best_neighbor.clone()
+            print(f"current change : {current.solution} cost : {current.cost}")
+    return best
 
 
 size_population = 10
