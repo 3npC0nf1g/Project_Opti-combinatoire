@@ -164,8 +164,9 @@ class Population:
         self.is_best_solution(new_solution)
 
     def choose_solutions(self,size):
-        total_cost = sum([s.cost for s in self.pop])
-        probability_cost = [s.cost / total_cost for s in self.pop]
+        inverted_costs = [1 / s.cost for s in self.pop]
+        total_inverted_cost = sum(inverted_costs)
+        probability_cost = [inverted_cost / total_inverted_cost for inverted_cost in inverted_costs]
         return list(np.random.choice(self.pop,size,False,probability_cost))
     
     def reproduce(self,number_of_childs):
