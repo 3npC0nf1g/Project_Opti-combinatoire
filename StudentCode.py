@@ -240,21 +240,21 @@ mutation_probability = 10
 
 number_of_population_generate = 0
 
-for i in range(10):
-    print(fitness([12,7,5,20,9,21,24,11,10,16,4,22,23,3,18,8,6,2,25,19]))
+#for i in range(10):
+#    print(fitness([12,7,5,20,9,21,24,11,10,16,4,22,23,3,18,8,6,2,25,19]))
 
-#while True: 
-#    population = Population(size_population)
-#    number_of_population_generate += 1
-#    print(f"Population pool {number_of_population_generate}\n")
-#    population.show_actual_population()
-#    population.show_best_solution()
-#
-#    for i in range(number_of_reproduction_per_population):
-#        print(f"{i+1}e reproducing... \n")
-#        population.reproduce(half_size_population)
-#        population.show_best_solution()
-#
-#    print("---------------------------------\n")
-#    print(f"Actual best solution is {population.best_solution.solution} with a cost {population.best_solution.cost}\n")
-#    print("---------------------------------\n")
+while True: 
+    population = Population(size_population)
+    number_of_population_generate += 1
+    print(f"Population pool {number_of_population_generate}\n")
+    population.show_actual_population()
+    population.show_best_solution()
+
+    for i in range(number_of_reproduction_per_population):
+        print(f"{i+1}e reproducing... \n")
+        population.reproduce(half_size_population)
+        population.show_best_solution()
+
+    print("---------------------------------\n")
+    print(f"Actual best solution is {population.best_solution.solution} with a cost {population.best_solution.cost}\n")
+    print("---------------------------------\n")
