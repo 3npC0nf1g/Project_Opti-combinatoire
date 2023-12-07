@@ -67,7 +67,7 @@ def instance_selection(instance_num):
         return "Singapore","ghzall",19
     elif instance_num==12:
         return "Singapore","dj",19
-    elif instance_num==1:
+    elif instance_num==13:
         return "Cairo","ghz",19
     else:
         print("Choix d'une instance inexistance, instance 1 revoyé  par défaut")
@@ -130,7 +130,7 @@ class ChildSolution(Solution):
     
     def mutation(self):
         list_possibilities = [x for x in range(m-1) if x not in self.solution]
-        mutation_value = list_possibilities[random.randint(0,len(list_possibilities))]
+        mutation_value = list_possibilities[random.randint(0,len(list_possibilities)-1)]
         self.solution[random.randint(0,len(self.solution)-1)] = mutation_value
 
 class Population:
@@ -152,11 +152,10 @@ class Population:
     def is_best_solution(self,new_solution):
         if(self.best_solution == None or new_solution.cost < self.best_solution.cost):
             self.best_solution = new_solution
-            return True
-        return False
 
     def initialize_solutions(self,size):
         for i in range(size):
+            print(f"{(100//size)*i}%",end="\r")
             self.add_solution(Solution())
 
     def add_solution(self,new_solution):
@@ -221,39 +220,41 @@ def best_local_children(child):
     current = child.clone()
         
     while(True):
-        best_neighbor = best_inversion_neighbor(current)
+        current = best_inversion_neighbor(current)
 
-        if(best.cost > best_neighbor.cost):
-            best = best_neighbor
-     
-        if(current.cost == best.cost):
+        if(best.cost > current.cost):
+            best = current.clone()
+            print(f"current change : {best.solution} cost : {best.cost}")
+        else:
             print(f"local best : {best.solution} cost : {best.cost}")
             break
-        else :
-            current = best_neighbor.clone()
-            print(f"current change : {current.solution} cost : {current.cost}")
+            
+
     return best
 
 
 size_population = 10
 half_size_population=size_population//2
-number_of_reproduction_per_population = 5
+number_of_reproduction_per_population = 10
 mutation_probability = 10
 
 number_of_population_generate = 0
 
-while True: 
-    population = Population(size_population)
-    number_of_population_generate += 1
-    print(f"Population pool {number_of_population_generate}\n")
-    population.show_actual_population()
-    population.show_best_solution()
+for i in range(10):
+    print(fitness([12,7,5,20,9,21,24,11,10,16,4,22,23,3,18,8,6,2,25,19]))
 
-    for i in range(number_of_reproduction_per_population):
-        print(f"{i+1}e reproducing... \n")
-        population.reproduce(half_size_population)
-        population.show_best_solution()
-
-    print("---------------------------------\n")
-    print(f"Actual best solution is {population.best_solution.solution} with a cost {population.best_solution.cost}\n")
-    print("---------------------------------\n")
+#while True: 
+#    population = Population(size_population)
+#    number_of_population_generate += 1
+#    print(f"Population pool {number_of_population_generate}\n")
+#    population.show_actual_population()
+#    population.show_best_solution()
+#
+#    for i in range(number_of_reproduction_per_population):
+#        print(f"{i+1}e reproducing... \n")
+#        population.reproduce(half_size_population)
+#        population.show_best_solution()
+#
+#    print("---------------------------------\n")
+#    print(f"Actual best solution is {population.best_solution.solution} with a cost {population.best_solution.cost}\n")
+#    print("---------------------------------\n")
