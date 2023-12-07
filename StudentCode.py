@@ -101,6 +101,9 @@ class Solution:
             self.solution = solution
         self.cost = fitness(self.solution)
 
+    def clone(self):
+        return Solution(solution=self.solution)
+
 class ChildSolution(Solution):
     father_solution = None
     mother_solution = None
@@ -186,7 +189,7 @@ class Population:
         self.pop = self.choose_solutions(size_population)
 
 def best_permutation_neighbor(current):
-    best = Solution(solution=current.solution)
+    best = current.clone()
     for i in range(n-1):
         for j in range(n-1):
             neighbor_sol = current.solution.copy()
@@ -195,24 +198,11 @@ def best_permutation_neighbor(current):
             neighbor = Solution(solution=neighbor_sol)
             
             if(neighbor.cost < best.cost):
-                best.solution = neighbor.solution
-    return best
-
-def best_insertion_neighbor(current):
-    best = Solution(solution=current.solution)
-    for i in range(n-2):
-        neighbor_sol = current.solution.copy()
-
-        tmp = neighbor_sol.pop(i)
-        neighbor_sol.insert(i+1,tmp)
-        neighbor = Solution(solution=neighbor_sol)
-
-        if(neighbor.cost < best.cost):
-            best.solution = neighbor.solution
+                best = neighbor.clone()
     return best
 
 def best_inversion_neighbor(current):
-    best = Solution(solution=current.solution)
+    best = current.clone()
     for i in range(n-1):
         neighbor_sol = current.solution.copy()
 
@@ -222,25 +212,25 @@ def best_inversion_neighbor(current):
         neighbor = Solution(solution=neighbor_sol)
         
         if(neighbor.cost < best.cost):
-            best.solution = neighbor.solution
+            best = neighbor.clone()
     return best
 
 def best_local_children(child):
-    best_local = child
-    current = child
+    best_local = child.clone()
+    current = child.clone()
         
     while(True):
-        print("Permutation")
-        best = best_permutation_neighbor(best_local)
+        print("Inversion")
+        best = best_inversion_neighbor(best_local)
         if(best.cost < best_local.cost):
-            best_local = best
+            best_local = best.clone()
             
         if(best_local.cost == current.cost):
             print(f"local best : {best_local.solution} cost : {best_local.cost}")
             break
         else :
             print(f"local best : {best_local.solution} cost : {best_local.cost}")
-            current = best_local
+            current = best_local.clone()
     return best_local
 
 
@@ -253,7 +243,7 @@ number_of_population_generate = 0
 
 while True: 
     population = Population(size_population)
-    number_of_population_generate +=1
+    number_of_population_generate += 1
     print(f"Population pool {number_of_population_generate}\n")
     population.show_actual_population()
     population.show_best_solution()
