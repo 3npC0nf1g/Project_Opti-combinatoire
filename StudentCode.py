@@ -94,15 +94,19 @@ class Solution:
     solution = None
     cost = None
 
-    def __init__(self,solution=None):
+    def __init__(self,solution=None,cost=None):
         if(solution == None):
             self.solution = random.sample(range(m-1),n)
         else:
             self.solution = solution
-        self.cost = fitness(self.solution)
+
+        if(cost == None):
+            self.cost = fitness(self.solution)
+        else:
+            self.cost = cost
 
     def clone(self):
-        return Solution(solution=self.solution)
+        return Solution(solution=self.solution,cost=self.cost)
 
 class ChildSolution(Solution):
     father_solution = None
@@ -118,8 +122,8 @@ class ChildSolution(Solution):
         first_point = random.randint(0,n-1)
         second_point = random.randint(first_point,n-1)
 
-        first_part = (self.father_solution.solution)[0:first_point]
-        third_part = (self.father_solution.solution)[second_point:n]
+        first_part = (self.father_solution.solution.copy())[0:first_point]
+        third_part = (self.father_solution.solution.copy())[second_point:n]
 
         list_tmp_first = [x for x in self.mother_solution.solution if x not in first_part]
         list_tmp_second = [x for x in list_tmp_first if x not in third_part]
@@ -206,9 +210,7 @@ def best_inversion_neighbor(current):
     for i in range(n-1):
         neighbor_sol = current.solution.copy()
 
-        tmp = neighbor_sol[i]
-        neighbor_sol[i] = neighbor_sol[i+1]
-        neighbor_sol[i+1] = tmp
+        neighbor_sol[i],neighbor_sol[i+1] = neighbor_sol[i+1],neighbor_sol[i]
         neighbor = Solution(solution=neighbor_sol)
         
         if(neighbor.cost < best.cost):
