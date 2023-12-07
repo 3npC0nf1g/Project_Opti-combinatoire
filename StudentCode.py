@@ -185,30 +185,44 @@ class Population:
 
         self.pop = self.choose_solutions(size_population)
 
-def best_permutation_neighbor(solution):
-    best = solution
+def best_permutation_neighbor(current):
+    best = Solution(solution=current.solution)
     for i in range(n-1):
         for j in range(n-1):
-            neighbor_sol = best.solution
+            neighbor_sol = current.solution.copy()
             
             neighbor_sol[i],neighbor_sol[j] = neighbor_sol[j],neighbor_sol[i]
-            neighbor = Solution(solution = neighbor_sol)
-    
+            neighbor = Solution(solution=neighbor_sol)
+            
             if(neighbor.cost < best.cost):
-                best = neighbor    
+                best.solution = neighbor.solution
     return best
 
-def best_insertion_neighbor(solution):
-    best = solution
+def best_insertion_neighbor(current):
+    best = Solution(solution=current.solution)
     for i in range(n-2):
-        neighbor_sol = solution.solution
+        neighbor_sol = current.solution.copy()
 
         tmp = neighbor_sol.pop(i)
         neighbor_sol.insert(i+1,tmp)
-        neighbor = Solution(solution = neighbor_sol)
+        neighbor = Solution(solution=neighbor_sol)
 
         if(neighbor.cost < best.cost):
-            best = neighbor 
+            best.solution = neighbor.solution
+    return best
+
+def best_inversion_neighbor(current):
+    best = Solution(solution=current.solution)
+    for i in range(n-1):
+        neighbor_sol = current.solution.copy()
+
+        tmp = neighbor_sol[i]
+        neighbor_sol[i] = neighbor_sol[i+1]
+        neighbor_sol[i+1] = tmp
+        neighbor = Solution(solution=neighbor_sol)
+        
+        if(neighbor.cost < best.cost):
+            best.solution = neighbor.solution
     return best
 
 def best_local_children(child):
@@ -216,8 +230,8 @@ def best_local_children(child):
     current = child
         
     while(True):
-        print("Insertion")
-        best = best_insertion_neighbor(best_local)
+        print("Permutation")
+        best = best_permutation_neighbor(best_local)
         if(best.cost < best_local.cost):
             best_local = best
             
@@ -230,9 +244,9 @@ def best_local_children(child):
     return best_local
 
 
-size_population = 50
+size_population = 10
 half_size_population=size_population//2
-number_of_reproduction_per_population = 15
+number_of_reproduction_per_population = 5
 mutation_probability = 10
 
 number_of_population_generate = 0
