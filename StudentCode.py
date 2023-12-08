@@ -106,15 +106,15 @@ class Solution:
             self.cost = cost
 
     def clone(self):
-        return Solution(solution=self.solution,cost=self.cost)
+        return Solution(solution=self.solution.copy(),cost=self.cost)
 
 class ChildSolution(Solution):
     father_solution = None
     mother_solution = None
 
     def __init__(self,father_solution,mother_solution):
-        self.father_solution = father_solution
-        self.mother_solution = mother_solution
+        self.father_solution = father_solution.clone()
+        self.mother_solution = mother_solution.clone()
 
         super().__init__(solution=self.cross_two_points())
 
@@ -217,12 +217,26 @@ def best_inversion_neighbor(current):
             best = neighbor.clone()
     return best
 
+def best_insertion_neighbor(current):
+    best = current.clone()
+    for i in range(n-1):
+        neighbor_sol = current.solution.copy()
+
+        insert = neighbor_sol.pop(i)
+        neighbor_sol.append(insert)
+        neighbor = Solution(solution=neighbor_sol)
+
+        if(neighbor.cost < best.cost):
+            best = neighbor.clone()
+    return best
+
 def best_local_children(child):
     best = child.clone()
     current = child.clone()
         
     while(True):
         current = best_inversion_neighbor(current)
+        current = best_insertion_neighbor(current)
 
         if(best.cost > current.cost):
             best = current.clone()
@@ -234,16 +248,12 @@ def best_local_children(child):
 
     return best
 
-
 size_population = 10
 half_size_population=size_population//2
 number_of_reproduction_per_population = 10
-mutation_probability = 10
+mutation_probability = 25
 
 number_of_population_generate = 0
-
-#for i in range(10):
-#    print(fitness([12,7,5,20,9,21,24,11,10,16,4,22,23,3,18,8,6,2,25,19]))
 
 while True: 
     population = Population(size_population)
