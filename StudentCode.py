@@ -220,7 +220,7 @@ def best_permutation_neighbor(current):
     return best
 
 def best_inversion_neighbor(current):
-    best = current
+    best = current.clone()
     for i in range(n-1):
         print(f"{round((50/(n-1))*i,2)}%",end="\r")
         neighbor_sol = current.solution.copy()
@@ -234,7 +234,7 @@ def best_inversion_neighbor(current):
     return best
 
 def best_insertion_neighbor(current):
-    best = current
+    best = current.clone()
     for i in range(n-1):
         print(f"{round(50+(50/(n-1))*i,2)}%",end="\r")
         neighbor_sol = current.solution.copy()
@@ -249,7 +249,7 @@ def best_insertion_neighbor(current):
 
 def best_local_children(child):
     best = child.clone()
-    current = child
+    current = child.clone()
         
     while(True):
         b_time = time.time()
