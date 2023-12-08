@@ -6,6 +6,8 @@ Created on Tue Nov 14 11:08:40 2023
 """
 
 import random
+import threading
+import time
 import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.transpiler import Layout
@@ -78,7 +80,7 @@ def instance_selection(instance_num):
 ##     Pour choisir une instance: 
 ##     Modifier instance_num ET RIEN D'AUTRE    
 ##-------------------------------------------------------
-instance_num=1     #### Entre 1 et 9 inclue
+instance_num=3     #### Entre 1 et 9 inclue
 
 backend_name,circuit_type,num_qubit=instance_selection(instance_num)
 backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
@@ -89,6 +91,11 @@ m=backend.num_qubits
 ##-------------------------------------------------------
 ##     A vous de jouer !  
 ##-------------------------------------------------------
+
+def set_best_init(best):
+    global best_solution_instance
+    if(best_solution_instance == None or best_solution_instance.cost > best.cost):
+            best_solution_instance = best
 
 class Solution:
     solution = None
@@ -144,6 +151,7 @@ class Population:
 
     def __init__(self,size):
         self.pop.clear()
+        print("Initialisation de la population :")
         self.initialize_solutions(size)
 
     def show_best_solution(self):
@@ -151,16 +159,19 @@ class Population:
         print(f"Solution : {self.best_solution.solution} with cost : {self.best_solution.cost} \n")
 
     def show_actual_population(self):
-        for sol in self.pop:
-            print(f"Solution : {sol.solution} with cost : {sol.cost} \n")
+        print(f"nombre d'individu : {len(self.pop)}")
+        for sol in self.pop: 
+            print(f"Solution : {sol.solution} with cost : {sol.cost}")
+        print(f"\n")
 
     def is_best_solution(self,new_solution):
         if(self.best_solution == None or new_solution.cost < self.best_solution.cost):
             self.best_solution = new_solution
+            set_best_init(self.best_solution)
 
     def initialize_solutions(self,size):
         for i in range(size):
-            print(f"{(100//size)*i}%",end="\r")
+            print(f"{round((100/size)*i,2)}%",end="\r")
             self.add_solution(Solution())
 
     def add_solution(self,new_solution):
@@ -184,6 +195,7 @@ class Population:
             if(random.randint(0,99) < mutation_probability):
                 child.mutation()
 
+            print(f"{i+1}e child :")
             child = best_local_children(child)
 
             childs.append(child)
@@ -196,6 +208,7 @@ class Population:
 def best_permutation_neighbor(current):
     best = current.clone()
     for i in range(n):
+        print(f"{round((100/(n))*i,2)}%",end="\r")
         for j in range(n):
             neighbor_sol = current.solution.copy()
             
@@ -207,8 +220,9 @@ def best_permutation_neighbor(current):
     return best
 
 def best_inversion_neighbor(current):
-    best = current.clone()
+    best = current
     for i in range(n-1):
+        print(f"{round((50/(n-1))*i,2)}%",end="\r")
         neighbor_sol = current.solution.copy()
 
         neighbor_sol[i],neighbor_sol[i+1] = neighbor_sol[i+1],neighbor_sol[i]
@@ -216,11 +230,13 @@ def best_inversion_neighbor(current):
         
         if(neighbor.cost < best.cost):
             best = neighbor.clone()
+    
     return best
 
 def best_insertion_neighbor(current):
-    best = current.clone()
+    best = current
     for i in range(n-1):
+        print(f"{round(50+(50/(n-1))*i,2)}%",end="\r")
         neighbor_sol = current.solution.copy()
 
         insert = neighbor_sol.pop(i)
@@ -228,28 +244,47 @@ def best_insertion_neighbor(current):
         neighbor = Solution(solution=neighbor_sol)
 
         if(neighbor.cost < best.cost):
-            best = neighbor.clone()
+            best = neighbor
     return best
 
 def best_local_children(child):
     best = child.clone()
-    current = child.clone()
+    current = child
         
     while(True):
+        b_time = time.time()
         current = best_inversion_neighbor(current)
         current = best_insertion_neighbor(current)
+        print(f"Cette bonne méthode a pris : {round(time.time() - b_time,2)}s")
 
         if(best.cost > current.cost):
             best = current.clone()
-            print(f"current change : {best.solution} cost : {best.cost}")
+            set_best_init(best)
+            print(f">>current change : {best.solution} cost : {best.cost}")
         else:
-            print(f"local best : {best.solution} cost : {best.cost}")
+            print(f">local best : {best.solution} cost : {best.cost}",end="\n\n")
             break
             
-
     return best
 
-size_population = 10
+def show_best_now():
+    global best_solution_instance
+    while(True):
+        input()
+        if(best_solution_instance != None):
+            print(f"best solution best solution is {best_solution_instance.solution} with a cost {best_solution_instance.cost} \n")
+        else: 
+            print("n'a pas encore trouvé de meilleur solution")
+           
+best_solution_instance = None
+ 
+t = threading.Thread(target=show_best_now)
+t.start()
+
+size_population = 50
+    
+size_population += int(size_population * (50/(m+n)))
+
 half_size_population=size_population//2
 number_of_reproduction_per_population = 10
 mutation_probability = 25
@@ -261,13 +296,7 @@ while True:
     number_of_population_generate += 1
     print(f"Population pool {number_of_population_generate}\n")
     population.show_actual_population()
-    population.show_best_solution()
 
     for i in range(number_of_reproduction_per_population):
         print(f"{i+1}e reproducing... \n")
         population.reproduce(half_size_population)
-        population.show_best_solution()
-
-    print("---------------------------------\n")
-    print(f"Actual best solution is {population.best_solution.solution} with a cost {population.best_solution.cost}\n")
-    print("---------------------------------\n")
