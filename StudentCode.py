@@ -80,7 +80,7 @@ def instance_selection(instance_num):
 ##     Pour choisir une instance: 
 ##     Modifier instance_num ET RIEN D'AUTRE    
 ##-------------------------------------------------------
-instance_num=3     #### Entre 1 et 9 inclue
+instance_num=1     #### Entre 1 et 9 inclue
 
 backend_name,circuit_type,num_qubit=instance_selection(instance_num)
 backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
@@ -269,10 +269,12 @@ def best_local_children(child):
 
 def show_best_now():
     global best_solution_instance
+    b_time = time.time()
     while(True):
         input()
+        print(f"running time : {round(time.time() - b_time,2)}s")
         if(best_solution_instance != None):
-            print(f"best solution best solution is {best_solution_instance.solution} with a cost {best_solution_instance.cost} \n")
+            print(f"best solution is {best_solution_instance.solution} with a cost {best_solution_instance.cost} \n")
         else: 
             print("n'a pas encore trouvé de meilleur solution")
            
@@ -281,9 +283,9 @@ best_solution_instance = None
 t = threading.Thread(target=show_best_now)
 t.start()
 
-size_population = 50
+size_population = 10
     
-size_population += int(size_population * (50/(m+n)))
+size_population += int(size_population * (size_population/(m+n)))
 
 half_size_population=size_population//2
 number_of_reproduction_per_population = 10
