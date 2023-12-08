@@ -96,7 +96,7 @@ class Solution:
 
     def __init__(self,solution=None,cost=None):
         if(solution == None):
-            self.solution = random.sample(range(m-1),n)
+            self.solution = random.sample(range(m),n)
         else:
             self.solution = solution
 
@@ -133,9 +133,10 @@ class ChildSolution(Solution):
         return (first_part + second_part + third_part)
     
     def mutation(self):
-        list_possibilities = [x for x in range(m-1) if x not in self.solution]
-        mutation_value = list_possibilities[random.randint(0,len(list_possibilities)-1)]
-        self.solution[random.randint(0,len(self.solution)-1)] = mutation_value
+        list_possibilities = [x for x in range(m) if x not in self.solution]
+        if(list_possibilities != []):
+            mutation_value = list_possibilities[random.randint(0,len(list_possibilities)-1)]
+            self.solution[random.randint(0,len(self.solution)-1)] = mutation_value
 
 class Population:
     best_solution = None
@@ -194,8 +195,8 @@ class Population:
 
 def best_permutation_neighbor(current):
     best = current.clone()
-    for i in range(n-1):
-        for j in range(n-1):
+    for i in range(n):
+        for j in range(n):
             neighbor_sol = current.solution.copy()
             
             neighbor_sol[i],neighbor_sol[j] = neighbor_sol[j],neighbor_sol[i]
