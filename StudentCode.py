@@ -15,7 +15,7 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit.providers.fake_provider import FakeSingaporeV2,FakeWashingtonV2,FakeCairoV2
 
 ##-------------------------------------------------------
-##     Definition de la fonction objetif à minimiser
+##     Definition de la fonction objectif à minimiser
 ##-------------------------------------------------------
 def fitness(layout):
     init_layout={qr[i]:layout[i] for i in range(len(layout))}
@@ -29,7 +29,7 @@ def fitness(layout):
     return QC.depth()
 
 ##-------------------------------------------------------
-##     Selection de l'instance du probleme
+##     Sélection de l'instance du probleme
 ##-------------------------------------------------------
 def instance_characteristic(backend_name,circuit_type,num_qubit):
     if backend_name == "Singapore":
@@ -81,7 +81,7 @@ def instance_selection(instance_num):
 ##     Modifier instance_num ET RIEN D'AUTRE    
 ##-------------------------------------------------------
 print("\n Choisi l'instance (Entre 1 et 12 inclue) : ",end="")
-instance_num=int(input()) # permet de choisir l'instance au début du programme
+instance_num=int(input()) # Permet de choisir l'instance au début du programme
 
 backend_name,circuit_type,num_qubit=instance_selection(instance_num)
 backend,qc,qr=instance_characteristic(backend_name,circuit_type,num_qubit)
@@ -98,21 +98,16 @@ class Solution:
     cost = None
 
     def __init__(self, solution, cost=None):
-        self.solution = solution if isinstance(solution,np.ndarray) else np.array(solution) # enregistre la solution donnée, transforme en np.array si pas déjà fait
-        self.cost = cost if cost is not None else fitness(self.solution) # calcule le fitness si le cost n'est pas donnée
+        self.solution = solution if isinstance(solution,np.ndarray) else np.array(solution) # Enregistre la solution donnée, transforme en np.array si pas déjà fait
+        self.cost = cost if cost is not None else fitness(self.solution) # Calcule le fitness si le cost n'est pas donné
 
-    def mutation(self): # change un chiffre par un chiffre non-présent dans la liste d'interger
+    def mutation(self): # Change un chiffre par un chiffre non-présent dans la liste de possibilités entières
         list_possibilities = [x for x in range(m) if x not in self.solution]
         if(list_possibilities != []):
             mutation_value = list_possibilities[random.randint(0,len(list_possibilities)-1)]
             self.solution[random.randint(0,n-1)] = mutation_value
-
-    def best_additive_neighbor(self): # Choisi la meilleur solution dans un voisinage [] + i (ex m=20 n=4 => 1 4 5 20 => 2 5 6 0 => 3 6 7 1 => ...)
-        npneighbors = np.array([Solution((self.solution + (i+1)) % m) for i in range(m-1)])
-        npneighbors = np.append(npneighbors,self)
-        return min(npneighbors, key=lambda x: x.cost)
     
-    def best_insertion_neighbor(self):
+    def best_insertion_neighbor(self):  # Effectue des découpes en 1 point pour obtenir le voisinage
         npneighbors = np.array(self)
         for i in range(n-2):
             current_solution = self.solution.copy()
@@ -120,7 +115,7 @@ class Solution:
 
         return min(npneighbors, key=lambda x: x.cost)
     
-    def best_inversion_neighbor(self):
+    def best_inversion_neighbor(self):  # Effectue des inversions d'éléments consécutifs pour obtenir le voisinage
         npneighbors = np.array(self)
         for i in range(n-1):
             current_solution = self.solution.copy()
@@ -138,8 +133,8 @@ class Population:
     current_population = None
     current_population_size = None
     
-    def __init__(self, population_size): # enregistre la taille et créer une nouvelle population random de taille choisi
-        print(f"\nInit de la population...", end="\n")
+    def __init__(self, population_size): # Enregistre la taille et créé une nouvelle population aléatoire de taille choisie
+        print(f"\nInitialisation de la population...", end="\n")
         self.current_population_size = population_size
         self.current_population = np.array([Solution(np.random.permutation(m)[:n]) for _ in range(population_size)], dtype=object)
         self.history_population = self.current_population.copy()
@@ -149,53 +144,53 @@ class Population:
 
     def reproduce(self,b_time,time_in_secondes):
         print("\nReproduce...")
-        for _ in range(size_population // 4 ): # fait 1/4 de la taille de la population de nouveau enfant
-            print("Creation d'un enfant", end="\r")
-            child = self.cross_two_points(parent=self.choose_solutions(self.current_population_size)) # prend 2 parents pour faire un enfant avec la technique des 2 point
+        for _ in range(size_population // 4 ): # Nombre de reproductions faisant 1/4 de la taille de la population
+            print("Création d'un enfant", end="\r")
+            child = self.cross_two_points(parent=self.choose_solutions(self.current_population_size)) # Prend 2 parents pour faire un enfant avec la technique des 2 points
             
             if(random.randint(0,99) < mutation_probability):
                 child.mutation()
             
-            while(time.time() - b_time < time_in_secondes): # boucle pour avoir le meilleur min entre les voisins
+            while(time.time() - b_time < time_in_secondes): # Boucle pour avoir le meilleur min entre les voisins
                           
                 print("Recherche locale de l'enfant", end="\r")
                 best = child.best_insertion_neighbor()
                 best = child.best_inversion_neighbor()
                 
-                self.history_population = np.append(self.history_population, best) # ajoute le best local dans l'historique
+                self.history_population = np.append(self.history_population, best) # Ajoute le best local dans l'historique
                 
-                if(best.cost == child.cost): # si le current et le même que le best alors c'est un min local donc sort de la boucle
-                    print(f"Minimum locale | solution : {best.solution} cost : {best.cost}", end="\n")
+                if(best.cost == child.cost): # Si le current est le même que le best alors c'est un min local -> sort de la boucle
+                    print(f"Minimum local | solution : {best.solution} cost : {best.cost}", end="\n")
                     self.current_population = np.append(self.current_population, best)
                     break
-                else: # sinon recommence avec le nouveau minimum trouvé
+                else: # Sinon recommence avec le nouveau minimum trouvé
                     child = best 
                 
-            if(time.time() - b_time >= time_in_secondes):   # si le temps est dépasser sors du for
+            if(time.time() - b_time >= time_in_secondes):   # Si le temps est dépassé sort de la boucle
                     break 
                   
-        self.current_population = self.choose_solutions(self.current_population_size) # Ajuste la taille de la pop pour reter à sa taille initiale
+        self.current_population = self.choose_solutions(self.current_population_size) # Régule la taille de la pop pour conserver sa taille initiale
             
     def cross_two_points(self,parent):
-        first_point = np.random.randint(0, n-1) # choisi le 1er point de coupe
-        second_point = np.random.randint(first_point, n-1) # choisi le 2e point de coupe
-        who = np.random.randint(0, 1) # choisi qui va être le père et la mère
+        first_point = np.random.randint(0, n-1) # Choisi le 1er point de coupe
+        second_point = np.random.randint(first_point, n-1) # Choisi le 2e point de coupe
+        who = np.random.randint(0, 1) # Choisi qui va être le père et la mère
 
-        first_part = parent[who].solution[:first_point] # prend la 1er et 3e partie au père
+        first_part = parent[who].solution[:first_point] # Prend la 1ère et 3e partie au père
         third_part = parent[who].solution[second_point:n]
 
         second_part = np.setdiff1d(parent[1-who].solution, np.concatenate([first_part, third_part]))[:n - len(first_part) - len(third_part)]
-        # prend la 2e partie en retirant les doublons de la 1er et 3e partie et coupe tout le trop
+        # Prend la 2ème partie en retirant les doublons de la 1ère et 3ème partie et coupe tout le trop
         
-        return Solution(np.concatenate([first_part, second_part, third_part])) # retourne une nouvelle sol avec les infos des parties
+        return Solution(np.concatenate([first_part, second_part, third_part])) # Retourne une nouvelle solution avec les infos des parties
 
-    def choose_solutions(self,size): # permet de chosir un nombre de membre dans la population actuelle (plus le coût est petit, plus il a de chance)
+    def choose_solutions(self,size): # Permet de chosir un nombre de membres dans la population actuelle (plus le coût est petit, plus il a de chance d'être choisi)
         inverted_costs = [1 / s.cost for s in self.current_population]
         total_inverted_cost = sum(inverted_costs)
         probability_cost = [inverted_cost / total_inverted_cost for inverted_cost in inverted_costs]
         return np.random.choice(self.current_population,size,False,probability_cost)
 
-    def show_current_best_solution(self): # donne la meilleur solution de toute la population
+    def show_current_best_solution(self): # Donne la meilleure solution de toute la population
         return min(self.history_population, key=lambda x: x.cost)
 
 ##-------------------------------------------------------
@@ -207,9 +202,9 @@ def show_best_now():
     b_time = time.time()
     while(True):
         input()
-        print(f"running time : {round(time.time() - b_time,2)}s")
+        print(f"Running time : {round(time.time() - b_time,2)}s")
         current_best_solution = population.show_current_best_solution()
-        print(f"Meilleur solution : {current_best_solution.solution} cost {current_best_solution.cost}")
+        print(f"Meilleure solution : {current_best_solution.solution} cost {current_best_solution.cost}")
 
 ##-------------------------------------------------------
 ##  Main
@@ -223,11 +218,11 @@ b_time = time.time()
 population = Population(size_population) # Création de la population
 
 t = threading.Thread(target=show_best_now,daemon=True)
-t.start() # lancement du thread pour voir le meilleur
+t.start() # Lancement du thread pour voir le meilleur
 
-while(time.time() - b_time < time_in_secondes): # fin de la boucle après Xsecondes
-    population.reproduce(b_time,time_in_secondes) # lance une reporduction
+while(time.time() - b_time < time_in_secondes): # Fin de la boucle après X secondes
+    population.reproduce(b_time,time_in_secondes) # Lance une reproduction
     
-print("=========================\n Temps alloué fini\n========================= ")
-current_best_solution = population.show_current_best_solution() #fin du programme et affiche la meilleur sol
-print(f"Meilleur solution : {current_best_solution.solution} cost {current_best_solution.cost}") 
+print("=========================\n Temps alloué écoulé\n========================= ")
+current_best_solution = population.show_current_best_solution() # Fin du programme et affiche la meilleure solution
+print(f"Meilleure solution : {current_best_solution.solution} cost {current_best_solution.cost}") 
