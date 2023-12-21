@@ -212,7 +212,7 @@ def show_best_now():
 
 size_population = 25
 mutation_probability = 25
-time_in_secondes = 5*60
+time_in_secondes = 8*60
 b_time = time.time()
 
 population = Population(size_population) # Création de la population
@@ -225,4 +225,10 @@ while(time.time() - b_time < time_in_secondes): # Fin de la boucle après X seco
     
 print("=========================\n Temps alloué écoulé\n========================= ")
 current_best_solution = population.show_current_best_solution() # Fin du programme et affiche la meilleure solution
-print(f"Meilleure solution : {current_best_solution.solution} cost {current_best_solution.cost}") 
+print(f"Meilleure solution : {current_best_solution.solution} cost {current_best_solution.cost}")
+
+fichier = open(f"GROUPE4_Instance_{instance_num}.txt","w")
+for s in current_best_solution.solution:
+    fichier.write(f"{s} ")
+fichier.write(f"{current_best_solution.cost}")
+fichier.close()
